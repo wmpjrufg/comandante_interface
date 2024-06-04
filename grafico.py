@@ -66,7 +66,16 @@ def gerar_degraus(n, valores_iniciais=[0.6, 0.3, 0]):
 
 def gerar_dado():
     dados_degraus = gerar_degraus(1)
-    return {'ID': dados_degraus['ID'], 'valor': dados_degraus['valores'][0], 'status': 'n/a'}
+    valor = dados_degraus['valores'][0]
+    status = ""
+    if valor == 0:
+        status = "desligado"
+    elif valor >= 0.6:
+        status = "cheio"
+    elif valor < 0.2:
+        status = "necessita de reposição"
+    return {'ID': dados_degraus['ID'], 'valor': valor, 'status': status}
+
 
 @app.route('/')
 def index():
