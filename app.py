@@ -1,12 +1,14 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, render_template
+from flask_socketio import SocketIO, send, emit
 
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
+socketio = SocketIO(app)
 
 #Constantes
-QUANT_WEIGHT = 2 #Quantidade máxima de dados armazenados de cada mesa
+QUANT_WEIGHT = 4 #Quantidade máxima de dados armazenados de cada mesa
 MAX_TIME = 300 #seconds
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -22,8 +24,8 @@ def verify_convert_date (date_string):
 
 #função para remover dados antigos
 def remove_oldest_data():
-    #now =  datetime.today()
-    now = datetime(2024, 5, 27, 12, 12)
+    now =  datetime.today() - timedelta(hours=0,minutes=0, seconds= 0)
+    #now = datetime(2024, 5, 27, 12, 12)
     for table in data_list:
         for item in table['weights']:
             delay = (now - item['datetime'])
@@ -46,6 +48,8 @@ def get_all_measures():
     return make_response(
         jsonify(data_list)
     )
+
+
 
 @app.route('/measures', methods=['POST'])
 def receive_weights():
@@ -81,7 +85,9 @@ def receive_weights():
         remove_excess(id)
 
         remove_oldest_data()
-
+        #Tratando lista e enviando
+        aux = jsonify(data_list)
+        socketio.emit('message', aux.get_json()) #envia os dados assim q eles são atualizados
         return make_response(
             jsonify( message= "Dados recebidos com sucesso", 
                      data=data), 200
@@ -91,4 +97,10 @@ def receive_weights():
             jsonify({"error": str(e)}), 400
         )
 
-app.run()
+@app.route('/')
+def index():
+    return render_template('index.html', data = data_list)
+
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True)

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask-SocketIO WebSocket</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            let data = "{{ data}}";
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+            socket.on('connect', function() {
+                console.log('Connected to WebSocket');
+                socket.send('Hello from client!');
+            });
+
+            socket.on('message', function(msg) {
+                console.log('Message from server:', msg);
+                data = msg
+                const tables = document.querySelector('#tables')
+                tables.innerHTML = '';
+                
+                for (let i = 0; i < data.length; i++) {
+                    tables.innerHTML += `<h1 id="table_id${i}"></h1>
+                                        <table id="weightsTable${i}">
+                                            <thead>
+                                                <tr>
+                                                    <th>Datetime</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                            </tbody>
+                                        </table>`;
+                    const tableBody = document.querySelector(`#weightsTable${i} tbody`);
+                    tableBody.innerHTML = ''; // Limpa o conteúdo atual da tabela
+                    document.getElementById(`table_id${i}`).textContent = `Table: ${data[i]['id']}`
+                    // Itera sobre os novos dados e adiciona linhas à tabela
+                    data[i].weights.forEach(weight => {
+                        const row = `
+                            <tr>
+                                <td>${weight.datetime}</td>
+                                <td>${weight.value}</td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                }
+            });
+
+        });
+    </script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 18px;
+            text-align: left;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Flask-SocketIO WebSocket Example</h1>
+
+    <div id="tables">
+        
+    </div>
+</body>
+</html>
