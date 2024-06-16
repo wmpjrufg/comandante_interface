@@ -5,17 +5,7 @@
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-            let data = "{{ data}}";
-            var socket = io.connect('http://' + document.domain + ':' + location.port);
-
-            socket.on('connect', function() {
-                console.log('Connected to WebSocket');
-                socket.send('Hello from client!');
-            });
-
-            socket.on('message', function(msg) {
-                console.log('Message from server:', msg);
-                data = msg
+            function tables(data){
                 const tables = document.querySelector('#tables')
                 tables.innerHTML = '';
                 
@@ -34,7 +24,7 @@
                                         </table>`;
                     const tableBody = document.querySelector(`#weightsTable${i} tbody`);
                     tableBody.innerHTML = ''; // Limpa o conteúdo atual da tabela
-                    document.getElementById(`table_id${i}`).textContent = `Table: ${data[i]['id']}`
+                    document.getElementById(`table_id${i}`).textContent = `Mesa: ${data[i]['id']}`
                     // Itera sobre os novos dados e adiciona linhas à tabela
                     data[i].weights.forEach(weight => {
                         const row = `
@@ -46,6 +36,19 @@
                         tableBody.innerHTML += row;
                     });
                 }
+            }
+
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+            socket.on('connect', function() {
+                console.log('Connected to WebSocket');
+                socket.send('Hello from client!');
+            });
+
+            socket.on('message', function(msg) {
+                console.log('Message from server:', msg);
+                data = msg
+                tables(data);
             });
 
         });
@@ -68,8 +71,6 @@
     </style>
 </head>
 <body>
-    <h1>Flask-SocketIO WebSocket Example</h1>
-
     <div id="tables">
         
     </div>

@@ -13,6 +13,7 @@ MAX_TIME = 300 #seconds
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 global data_list
+data_list_json = []
 data_list = []
 
 # Função para verificar e converter a data
@@ -53,6 +54,7 @@ def get_all_measures():
 
 @app.route('/measures', methods=['POST'])
 def receive_weights():
+     global data_list_json
      try:
         data = request.get_json()
 
@@ -86,8 +88,9 @@ def receive_weights():
 
         remove_oldest_data()
         #Tratando lista e enviando
-        aux = jsonify(data_list)
-        socketio.emit('message', aux.get_json()) #envia os dados assim q eles são atualizados
+        data_list_json = jsonify(data_list).get_json()
+        socketio.emit('message', data_list_json) #envia os dados assim q eles são atualizados
+        print(data_list_json)
         return make_response(
             jsonify( message= "Dados recebidos com sucesso", 
                      data=data), 200
@@ -97,9 +100,17 @@ def receive_weights():
             jsonify({"error": str(e)}), 400
         )
 
+
 @app.route('/')
 def index():
-    return render_template('index.html', data = data_list)
+    return render_template('index.html')
+
+@socketio.on('connect')
+def handle_connect():
+    global data_list_json
+    print('Client connected')
+    print(data_list_json)
+    emit('message', data_list_json)  # Envia a mensagem ao cliente
 
 
 if __name__ == '__main__':
