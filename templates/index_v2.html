@@ -26,11 +26,11 @@
                     tableBody.innerHTML = ''; // Limpa o conteúdo atual da tabela
                     document.getElementById(`table_id${i}`).textContent = `Mesa: ${data[i]['id']}`
                     // Itera sobre os novos dados e adiciona linhas à tabela
-                    data[i].weights.forEach(weight => {
+                    data[i].consumos.forEach((consumo,index) => {
                         const row = `
                             <tr>
-                                <td>${weight.datetime}</td>
-                                <td>${weight.value}</td>
+                                <td>${data[i].horarios[index]}</td>
+                                <td>${consumo}</td>
                             </tr>
                         `;
                         tableBody.innerHTML += row;
@@ -71,6 +71,7 @@
     </style>
 </head>
 <body>
+    <h1>Mesas</h1>
     <div id="tables">
         
     </div>
