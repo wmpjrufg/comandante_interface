@@ -1,13 +1,15 @@
+import threading
 import requests
+import time
+import random
 import json
 import numpy as np
 from datetime import datetime, timedelta
 
-def tag_simulador(tempo):
+def tag_simulador(tempo, thread_id):
     """
     Simulador da TAG comander.
     """
-
     # gera um número aleatório
     r = np.random.rand()
     w_0 = .945
@@ -26,7 +28,7 @@ def tag_simulador(tempo):
     horario = data_atual + timedelta(minutes=tempo)
 
     pacote_dados =  {
-                      "id": "1",
+                      "id": str(thread_id),
                       "horario": horario.strftime('%Y-%m-%d %H:%M:%S'),
                       "consumo": consumo
                     }
@@ -40,12 +42,24 @@ def enviar_dados(url, headers, dados):
     response = requests.post(url, headers=headers, data=json.dumps(dados))
     
     if response.status_code == 200:
-        print("Dados enviados com sucesso!")
+        print(f"Dados enviados com sucesso pela thread {dados['id']}!")
         print("Resposta da API:", response.json())
     else:
-        print("Falha ao enviar dados")
+        print(f"Falha ao enviar dados pela thread {dados['id']}")
         print("Status Code:", response.status_code)
         print("Resposta da API:", response.json())
+
+def thread_func(url, headers, dic, i):
+    """
+    Função para ser executada em uma thread.
+    """
+    while True:
+        dados_consumo = tag_simulador(i, i)
+        enviar_dados(url, headers, dados_consumo)
+        dic["id"] = dados_consumo["id"]  # Atualiza o id (se necessário)
+        dic["horario"].append(dados_consumo["horario"])
+        dic["consumo"].append(dados_consumo["consumo"])
+        time.sleep(random.randint(1, 5))
 
 if __name__ == '__main__':
     url = "http://127.0.0.1:5000/api/dados"  # URL do servidor Flask local
@@ -57,12 +71,17 @@ if __name__ == '__main__':
         "id": '',
         "horario": [],
         "consumo": []
-        }
+    }
+
+    threads = []
 
     for i in range(10):
-        dados_consumo = tag_simulador(i)
-        enviar_dados(url, headers, dados_consumo)
-        dic["id"] = dados_consumo["id"]  # Atualiza o id (se necessário)
-        dic["horario"].append(dados_consumo["horario"])
-        dic["consumo"].append(dados_consumo["consumo"])
+        thread = threading.Thread(target=thread_func, args=(url, headers, dic, i))
+        threads.append(thread)
+        thread.start()
+
+    # Espera todas as threads terminarem
+    for thread in threads:
+        thread.join()
+
     print(dic)
