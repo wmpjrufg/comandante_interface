@@ -13,11 +13,14 @@
                     var consumo = 0
                     consumo = Math.floor(data[i].consumos[data[i].consumos.length -1] * 100);
                     tables.innerHTML += `<div class ="table" id="table_${data[i].id}">
-                                            <div class="icon">
-                                                <img src="{{ url_for('static', filename='garrafa.png') }}" alt="garrafa" id="garrafa_${data[i].id}">
-                                                <p class="porcentagem" id="porcentagem_${data[i].id}">${consumo}%</p>
-                                                <p id="num_mesa">${data[i].id}</p>
+                                            <div class="bottle" id="garrafa_${data[i].id}>
+                                                <div class="neck"></div>
+                                                <div class="body">
+                                                    <div class="glass-effect"></div>
+                                                </div>
                                             </div>
+                                            <p class="porcentagem" id="porcentagem_${data[i].id}">${consumo}%</p>
+                                            <p id="num_mesa">${data[i].id}</p>
                                         </div>`;
                     const cor_table = document.getElementById(`garrafa_${data[i].id}`);
                     const cor_porce = document.getElementById(`porcentagem_${data[i].id}`);
@@ -69,31 +72,57 @@
             height: 200px;
             margin: 1% 5% 3% 1%; 
         }
-        /* Estilo para o contêiner do ícone */
-        .icon {
-            display: flex;              /* Habilita flexbox */
-            justify-content: center;    /* Centraliza horizontalmente */
-            align-items: center;        /* Centraliza verticalmente */
-            width: 200px;               /* Define a largura do contêiner */
-            height: 200px;              /* Define a altura do contêiner */
-            position: relative;         /* Define o contexto para posicionamento absoluto */
-
+        .bottle {
+            position: relative;
+            width: 120px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Estilo para a imagem */
-        .icon img {
-            width: 180px;               /* Define a largura da imagem */
-            height: 180px;              /* Define a altura da imagem */
-            border: 4px solid;      /* Define a cor da borda */
-            transition: border-color 0.3s ease; /* Transição para a cor da borda */
-            background-color: #eee;     /* Define a cor de fundo */
-            border-radius: 30%;         /* Arredonda os cantos da imagem */
-            object-fit: cover;          /* Garante que a imagem seja cortada se necessário */
-            padding: 4px;
+        .neck {
+            width: 38px;
+            height: 100px;
+            /* background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(0, 150, 136, 0.6)); */
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            border: solid 2px black;
+            border-bottom: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
+        .body {
+            position: relative;
+            width: 100px;
+            height: 260px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(0, 150, 136, 0.5));
+            border-radius: 35% 35% 10% 10%;
+            border: solid 2px black;
+            border-top: none;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .glass-effect {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 10%, transparent 70%);
+            transform: translateX(-50%);
+            opacity: 0.5;
+        }
+        .trapezoid {
+            width: 200px;
+            height: 0;
+            border-bottom: 100px solid #3498db;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+        }
         /* Estilo para o texto sobreposto */
-        .icon .porcentagem {
+        .table .porcentagem {
             position: absolute;         /* Posiciona o texto em relação ao contêiner */
             top: 60%;                   /* Move o texto para o meio verticalmente */
             left: 50%;                  /* Move o texto para o meio horizontalmente */
@@ -104,7 +133,7 @@
         }
 
         /* Estilo para o texto no canto inferior direito */
-        .icon #num_mesa {
+        .table #num_mesa {
             position: absolute;         /* Posiciona o texto em relação ao contêiner */
             bottom: 5px;                /* Define a distância do texto em relação ao fundo */
             right: 20px;                 /* Define a distância do texto em relação à direita */

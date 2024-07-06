@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garrafa de Vidro</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 600px;
+            background: #e0f7fa;
+            margin: 0;
+
+        }
+        .boca{
+            width: 25px;
+            height: 10px;
+            border: 2px solid black;
+            border-radius: 3px;
+        }
+
+        .bottle {
+            position: relative;
+            width: 120px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .neck {
+            width: 38px;
+            height: 100px;
+            /* background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(0, 150, 136, 0.6)); */
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            border: solid 2px black;
+            border-bottom: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            
+        }
+        
+
+        .body {
+            position: relative;
+            width: 75px;
+            height: 204px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(0, 150, 136, 0.5));
+            border-radius: 25% 25% 10% 10%;
+            border: solid 2px black;
+            border-top: none;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .svg-path {
+            fill: #fff; /* Cor de preenchimento */
+            stroke: none; /* Cor da linha */
+            stroke-width: 2px; /* Largura da linha */
+            
+        }
+    </style>
+</head>
+<body>
+    <div class="bottle">
+        <!-- <div class="neck"></div> -->
+         <div class="boca"></div>
+        <svg width="40px" height="100px" viewBox="0 0 40 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Trapézio -->
+            <polygon class="svg-path" points="7,0 33,0 40,100 0,100" fill="#fff" stroke="none" />
+            <!-- Linha superior -->
+            <line x1="9" y1="0" x2="31" y2="0" stroke="black" stroke-width="2" />
+            <!-- Linha esquerda -->
+            <line x1="9" y1="0" x2="0" y2="100" stroke="black" stroke-width="2" />
+            <!-- Linha direita -->
+            <line x1="31" y1="0" x2="40" y2="100" stroke="black" stroke-width="2" />
+        
+            <!-- Círculo achato com borda -->
+        </svg>
+        <div class="body">
+            
+        </div>
+    </div>
+</body>
+</html>

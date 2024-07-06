@@ -70,7 +70,7 @@ def receive_weights():
                     raise ValueError("O JSON deve conter os campos 'id', 'horario' e 'consumo'")
         
         #Converte as strings de tempo em Date
-        id = data['id']
+        id = int(data['id'])
         horarios = []
         consumos = []
        
@@ -116,7 +116,8 @@ def receive_weights():
 
 @app.route('/')
 def index():
-    return render_template('teste_mesas_icon.html')
+    # return render_template('teste_mesas_icon.html')
+    return render_template('teste_garrafa_css.html')
 
 @socketio.on('connect')
 def handle_connect():
