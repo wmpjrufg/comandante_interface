@@ -117,7 +117,7 @@ def receive_weights():
 @app.route('/')
 def index():
     # return render_template('teste_mesas_icon.html')
-    return render_template('teste_garrafa_css.html')
+    return render_template('teste_garrafa.html')
 
 @socketio.on('connect')
 def handle_connect():
