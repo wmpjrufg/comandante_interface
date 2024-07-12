@@ -63,24 +63,24 @@ def receive_weights():
         # Verificar se o JSON contém os campos esperados
 
         if(data['id'] != ""):
-            chaves_necessarias = ["id", "horario", "consumo"]
+            chaves_necessarias = ["id", "bateria", "consumo"]
             for chave in chaves_necessarias:
                 if chave not in data:
                     print(f"A chave '{chave}' está faltando.")
-                    raise ValueError("O JSON deve conter os campos 'id', 'horario' e 'consumo'")
+                    raise ValueError("O JSON deve conter os campos 'id', 'bateria' e 'consumo'")
         
         #Converte as strings de tempo em Date
         id = int(data['id'])
         horarios = []
         consumos = []
+        bateria = []
        
-        convert_date = verify_convert_date(data['horario'])#converte para date
+        # convert_date = verify_convert_date(data['horario'])#converte para date
 
-        if(convert_date != None):
-            horarios.append(convert_date)
-            consumos.append(data['consumo'])
-        else:
-            raise ValueError("Uma das datas informadas não correspondem com o formato")
+        print(data['bateria'])
+        horarios.append(datetime.today())
+        consumos.append(data['consumo'])
+        bateria.append(data['bateria'])
             
         # Verifica se o Id já existe, se existe atualiza, caso contrário adiciona
         if(any(item['id'] == id for item in data_list)):
@@ -88,19 +88,20 @@ def receive_weights():
                 if item['id'] == id:
                     item['horarios'].extend(horarios)
                     item['consumos'].extend(consumos)
+                    item['bateria'].extend(bateria)
                     break
         else:
-            data_list.append({'id': id, 'horarios':horarios, 'consumos': consumos})
+            data_list.append({'id': id, 'horarios':horarios, 'consumos': consumos, 'bateria': bateria})
 
         remove_excess(id)
 
         remove_oldest_data()
         #Tratando lista e enviando
         #data_list =  dict(sorted(data_list.items(), key=lambda item: item[1]['id']))
-        print('dados:')
+        #print('dados:')
         
         data_list_ord = sorted(data_list, key=lambda item: item['id'])
-        print(data_list_ord)
+        #print(data_list_ord)
         data_list_json = jsonify(data_list_ord).get_json()
         socketio.emit('message', data_list_json) #envia os dados assim q eles são atualizados
         #print(data_list_json)

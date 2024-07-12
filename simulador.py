@@ -6,7 +6,7 @@ import json
 import numpy as np
 from datetime import datetime, timedelta
 
-def tag_simulador(tempo, thread_id):
+def tag_simulador(tempo, bateria, thread_id):
     """
     Simulador da TAG comander.
     """
@@ -30,7 +30,7 @@ def tag_simulador(tempo, thread_id):
 
     pacote_dados =  {
                       "id": str(thread_id),
-                      "horario": horario.strftime('%Y-%m-%d %H:%M:%S'),
+                      "bateria": bateria,
                       "consumo": consumo
                     }
         
@@ -55,13 +55,19 @@ def thread_func(url, headers, dic, i):
     Função para ser executada em uma thread.
     """
     cont = 0
+    bateria = 100
     while True:
-        dados_consumo = tag_simulador(cont, i)
+        dados_consumo = tag_simulador(cont, bateria, i)
         enviar_dados(url, headers, dados_consumo)
         dic["id"] = dados_consumo["id"]  # Atualiza o id (se necessário)
-        dic["horario"].append(dados_consumo["horario"])
+        dic["bateria"].append(dados_consumo["bateria"])
         dic["consumo"].append(dados_consumo["consumo"])
         time.sleep(random.randint(2, 5))
+        if(bateria <= 0):
+            bateria = 100
+        else:
+            bateria -= 1
+
         if (dados_consumo["consumo"] <= 0.05):
             cont = 0
         else:
@@ -75,7 +81,7 @@ if __name__ == '__main__':
 
     dic = {
         "id": '',
-        "horario": [],
+        "bateria": [],
         "consumo": []
     }
 

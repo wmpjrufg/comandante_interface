@@ -13,8 +13,9 @@
                 
                 for (let i = 0; i < data.length; i++) {
                     var consumo = 0
-                    console.log(i)
+                    // console.log(i)
                     consumo = Math.floor(data[i].consumos[data[i].consumos.length -1] * 100);
+                    bateria = data[i].bateria[data[i].bateria.length -1]
                     tables.innerHTML += `<div id="table_${data[i].id}" class= table>
                         <p id="num_mesa">Mesa: ${data[i].id}</p>
                         <div class="bottle">
@@ -36,16 +37,22 @@
                             </div>
                         </div>
                          <p class="porcentagem" id="porcentagem_${data[i].id}">${consumo}%</p>
+                         <div class="bateria" ><div class="carga" id="bateria_${data[i].id}"></div></div>
                          <p id = "mensagem_${data[i].id}" class = "msg"> </p>
                     </div>`;
                     const qtde = document.querySelector(`#table_${data[i].id} .liq`);
                     const porc = document.querySelector(`#porcentagem_${data[i].id}`);
                     const mesa = document.querySelector(`#table_${data[i].id}`);
                     const msg = document.querySelector(`#mensagem_${data[i].id}`);
+                    const bat = document.querySelector(`#bateria_${data[i].id}`);
                     qtde.style.height = `${consumo}%`
+                    bat.style.height = `${bateria}%`
+                    if(bateria < 20){
+                        bat.style.backgroundColor = `red`
+                    }
                     if(consumo < 20){
                         qtde.style.backgroundColor = `red`
-                        msg.innerText = "Precisa ser trocada"
+                        msg.innerText = "TROCAR"
                         mesa.style.borderColor = "red"
                         porc.style.color = 'red'
                     }
@@ -172,10 +179,25 @@
         .msg{
             position: absolute;
             bottom: 0px;
-            left: 9px;
-            font-size: 18px;
+            left: 23px;
+            font-size: 25px;
             color: red;
             text-align: center;
+        }
+        .bateria {
+            position: absolute;
+            height: 50px;
+            width: 10px;
+            right: 5px;
+            bottom: 4px;
+            border: 1px solid black;
+        }
+        .carga {
+            position: absolute; /* Posicionamento absoluto */
+            bottom: 0; /* Coloca o elemento no final do body */
+            height: 100%;
+            width: 100%;
+            background-color: rgb(25, 212, 25);
         }
     </style>
 </head>
