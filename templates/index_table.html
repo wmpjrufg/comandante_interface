@@ -16,6 +16,7 @@
                                                 <tr>
                                                     <th>Datetime</th>
                                                     <th>Value</th>
+                                                    <th>Bateria</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -26,11 +27,12 @@
                     tableBody.innerHTML = ''; // Limpa o conteúdo atual da tabela
                     document.getElementById(`table_id${i}`).textContent = `Mesa: ${data[i]['id']}`
                     // Itera sobre os novos dados e adiciona linhas à tabela
-                    data[i].consumos.forEach((consumo,index) => {
+                    data[i].pesos.forEach((peso,index) => {
                         const row = `
                             <tr>
                                 <td>${data[i].horarios[index]}</td>
-                                <td>${consumo}</td>
+                                <td>${peso}</td>
+                                 <td>${data[i].bateria[index]}</td>
                             </tr>
                         `;
                         tableBody.innerHTML += row;

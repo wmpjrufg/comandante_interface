@@ -14,15 +14,15 @@ def tag_simulador(tempo, bateria, thread_id):
     r = np.random.rand()
     w_0 = .945
 
-    # perfil de consumo
+    # perfil de peso
     # perfil rápido
     if r < 0.5:
         lambda_r = 0.08
-        consumo = w_0 * np.exp(-lambda_r * tempo)
+        peso = w_0 * np.exp(-lambda_r * tempo)
     # perfil devagar
     else:
         lambda_d = 0.1
-        consumo = w_0 * np.exp(-lambda_d * tempo)
+        peso = w_0 * np.exp(-lambda_d * tempo)
 
     data_atual = datetime.now()
     horario = data_atual
@@ -31,7 +31,7 @@ def tag_simulador(tempo, bateria, thread_id):
     pacote_dados =  {
                       "id": str(thread_id),
                       "bateria": bateria,
-                      "consumo": consumo
+                      "peso": round(peso,2)*100
                     }
         
     return pacote_dados
@@ -57,37 +57,38 @@ def thread_func(url, headers, dic, i):
     cont = 0
     bateria = 100
     while True:
-        dados_consumo = tag_simulador(cont, bateria, i)
-        enviar_dados(url, headers, dados_consumo)
-        dic["id"] = dados_consumo["id"]  # Atualiza o id (se necessário)
-        dic["bateria"].append(dados_consumo["bateria"])
-        dic["consumo"].append(dados_consumo["consumo"])
+        dados_peso = tag_simulador(cont, bateria, i)
+        enviar_dados(url, headers, dados_peso)
+        dic["id"] = dados_peso["id"]  # Atualiza o id (se necessário)
+        dic["bateria"].append(dados_peso["bateria"])
+        dic["peso"].append(dados_peso["peso"])
         time.sleep(random.randint(2, 5))
         if(bateria <= 0):
             bateria = 100
         else:
             bateria -= 1
 
-        if (dados_consumo["consumo"] <= 0.05):
+        if (dados_peso["peso"] <= 5):
             cont = 0
         else:
             cont = cont + 1
 
 if __name__ == '__main__':
-    url = "http://127.0.0.1:5000/measures"  # URL do servidor Flask local
+    url = "http://127.0.0.1:5000/api/measures"  # URL do servidor Flask local
     headers = {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        'Authorization': 'Bearer herhgydghdnsrtn3t'
     }
 
     dic = {
         "id": '',
         "bateria": [],
-        "consumo": []
+        "peso": []
     }
 
     threads = []
 
-    for i in range(1,11):
+    for i in range(1,3):
         thread = threading.Thread(target=thread_func, args=(url, headers, dic, i))
         threads.append(thread)
         thread.start()
