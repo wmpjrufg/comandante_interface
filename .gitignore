@@ -1,8 +1,5 @@
 .venv
-<<<<<<< HEAD
-*.ipynb 
-__pycache__
-=======
 __pycache__
 notes
->>>>>>> Nilson
+*.ipynb 
+__pycache__
