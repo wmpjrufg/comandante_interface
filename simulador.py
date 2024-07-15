@@ -62,7 +62,7 @@ def thread_func(url, headers, dic, i):
         time.sleep(random.randint(1, 5))
 
 if __name__ == '__main__':
-    url = "http://127.0.0.1:5000/api/dados"  # URL do servidor Flask local
+    url = "https://comandante.pythonanywhere.com/api/dados"  # URL do servidor Flask local
     headers = {
         "Content-Type": "application/json"
     }
