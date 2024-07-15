@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comandante</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <link rel="stylesheet" href="garrafa.css">
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+
+            function tables(data){
+                const tables = document.querySelector('#tables')
+                tables.innerHTML = '';
+                
+                for (let i = 0; i < data.length; i++) {
+                    var peso = 0
+                    // console.log(i)
+                    peso = Math.round((data[i].pesos[data[i].pesos.length -1]));
+                    bateria = data[i].bateria[data[i].bateria.length -1]
+                    tables.innerHTML += `<div id="table_${data[i].id}" class= table>
+                        <p id="num_mesa">Mesa: ${data[i].id}</p>
+                        <div class="bottle">
+                            <div class="boca"></div>
+                            <svg width="40px" height="100px" viewBox="0 0 40 100" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Trapézio -->
+                                <polygon class="neck" points="7,0 33,0 40,100 0,100" fill="#fff" stroke="none" />
+                                <!-- Linha superior -->
+                                <line x1="9" y1="0" x2="31" y2="0" stroke="black" stroke-width="3" />
+                                <!-- Linha esquerda -->
+                                <line x1="9" y1="0" x2="0" y2="100" stroke="black" stroke-width="3" />
+                                <!-- Linha direita -->
+                                <line x1="31" y1="0" x2="40" y2="100" stroke="black" stroke-width="3" />
+                            
+                                <!-- Círculo achato com borda -->
+                            </svg>
+                            <div class="body">
+                                <div class="liq"></div>
+                            </div>
+                        </div>
+                         <p class="porcentagem" id="porcentagem_${data[i].id}">${peso}%</p>
+                         <div class="bateria" ><div class="carga" id="bateria_${data[i].id}"></div></div>
+                         <p id = "mensagem_${data[i].id}" class = "msg"> </p>
+                    </div>`;
+                    const qtde = document.querySelector(`#table_${data[i].id} .liq`);
+                    const porc = document.querySelector(`#porcentagem_${data[i].id}`);
+                    const mesa = document.querySelector(`#table_${data[i].id}`);
+                    const msg = document.querySelector(`#mensagem_${data[i].id}`);
+                    const bat = document.querySelector(`#bateria_${data[i].id}`);
+                    qtde.style.height = `${peso}%`
+                    bat.style.height = `${bateria}%`
+                    if(bateria < 20){
+                        bat.style.backgroundColor = `red`
+                    }
+                    if(peso < 20){
+                        qtde.style.backgroundColor = `red`
+                        msg.innerText = "TROCAR"
+                        mesa.style.borderColor = "red"
+                        porc.style.color = 'red'
+                    }
+
+                }
+            }
+
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+            socket.on('connect', function() {
+                console.log('Connected to WebSocket');
+                socket.send('Hello from client!');
+            });
+
+            socket.on('message', function(msg) {
+                console.log('Message from server:', msg);
+                data = msg
+                tables(data);
+            });
+
+        });
+    </script>
+    <style>
+        h1{
+            text-align: center;
+        }
+        /* body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #e0f7fa;
+            --background-color: #e0f7fa;
+            margin: 0;
+            position: relative;
+        } */
+        body{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            --background-color: #fff;
+        }
+        #tables{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 100vw; /* Limita a largura à largura da tela */
+            padding: 10px;
+            overflow-x: hidden;
+
+        }
+        .table{
+            position: relative;
+            margin-bottom: 20px;
+            width: 150px;
+            align-items: center;
+            margin-right: 5%;
+            border: 2px solid gray;
+            border-radius: 10px;
+            
+        }
+        .bottle {
+
+            height: 330px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: scale(0.5);
+            margin-top: 0; /* Zera a margem superior */
+
+        }
+        .boca{
+            width: 25px;
+            height: 10px;
+            border: 3px solid black;
+            border-radius: 3px;
+        }
+
+
+        .body {
+            position: relative;
+            width: 75px;
+            height: 204px;
+            border-radius: 28% 28% 10% 10%;
+            border: solid 5px black;
+            border-top: none;
+            overflow: hidden;
+        }
+
+        .neck {
+            fill: var(--background-color);
+            stroke: none; /* Cor da linha */
+            stroke-width: 5px; /* Largura da linha */
+            
+        }
+        .liq{
+            
+            position: absolute; /* Posicionamento absoluto */
+            bottom: 0; /* Coloca o elemento no final do body */
+            height: 100%; /* Altura do elemento, calculada a partir do final do body */
+            width: 100%; /* Largura total do body */
+            background-color: rgb(248, 229, 68); /* Cor de fundo */
+
+
+        }
+        .porcentagem {
+            position: absolute;
+            bottom:36px;
+            left: 53px;
+            text-align: center;
+            padding: 2px 5px;         
+            font-size: 20px;
+        }
+
+        #num_mesa {
+            position: absolute;
+            left: 37px;
+            text-align: center;
+            color: black;              
+            font-size: 25px; 
+            margin-bottom: 0; 
+        }
+        .msg{
+            position: absolute;
+            bottom: 0px;
+            left: 23px;
+            font-size: 25px;
+            color: red;
+            text-align: center;
+        }
+        .bateria {
+            position: absolute;
+            height: 50px;
+            width: 10px;
+            right: 5px;
+            bottom: 4px;
+            border: 1px solid black;
+            border-radius: 3px;
+        }
+        .carga {
+            position: absolute; /* Posicionamento absoluto */
+            bottom: 0; /* Coloca o elemento no final do body */
+            height: 100%;
+            width: 100%;
+            background-color: rgb(25, 212, 25);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mesas</h1>
+    <div id="tables">
+        
+    </div>
+</body>
+</html>
