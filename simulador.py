@@ -39,15 +39,23 @@ def enviar_dados(url, headers, dados):
     """
     Envia os dados para a API via requisição POST.
     """
-    response = requests.post(url, headers=headers, data=json.dumps(dados))
-    
-    if response.status_code == 200:
-        print(f"Dados enviados com sucesso pela thread {dados['id']}!")
-        print("Resposta da API:", response.json())
-    else:
-        print(f"Falha ao enviar dados pela thread {dados['id']}")
-        print("Status Code:", response.status_code)
-        print("Resposta da API:", response.json())
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(dados))
+        response.raise_for_status()  # Lança uma exceção se a requisição falhar
+        
+        if response.status_code == 200:
+            print(f"Dados enviados com sucesso pela thread {dados['id']}!")
+            print("Resposta da API:", response.json())
+        else:
+            print(f"Falha ao enviar dados pela thread {dados['id']}")
+            print("Status Code:", response.status_code)
+            print("Resposta da API:", response.json())
+            
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao enviar requisição: {e}")
+    except json.JSONDecodeError as e:
+        print(f"Erro ao decodificar resposta JSON: {e}")
+
 
 def thread_func(url, headers, dic, i):
     """
