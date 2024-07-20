@@ -16,6 +16,13 @@ data_list_json = []
 alive_list = []
 data_list = []
 
+
+# @app.before_request
+# def before_request():
+#     if not request.is_secure and app.env != "development":
+#         url = request.url.replace("http://", "https://", 1)
+#         return redirect(url, code=301)
+
 def check_password(auth_header):
     if auth_header is None or not auth_header.startswith("Bearer "):
         return 1
@@ -38,10 +45,16 @@ def remove_oldest_data():
 
 def remove_not_alive():
     now = datetime.today()
+<<<<<<< Updated upstream
+=======
+    to_remove = []
+>>>>>>> Stashed changes
     for table in alive_list:
-        delay = (now - table['horario'])
-        if(delay > timedelta(seconds=MAX_TIME_ALIVE)):
-            del table
+        delay = now - table['horario']
+        if delay > timedelta(seconds=MAX_TIME_ALIVE):
+            to_remove.append(table)
+    for table in to_remove:
+        alive_list.remove(table)
 
 # remove os dados mais antigos quando atinge um limite de dados armazenados
 def remove_excess(id):
@@ -95,7 +108,12 @@ def receive_weights():
 
             remove_excess(id)
             remove_oldest_data()
+<<<<<<< Updated upstream
 
+=======
+            remove_not_alive()
+            
+>>>>>>> Stashed changes
             data_list_ord = sorted(data_list, key=lambda item: item['id'])
             data_list_json = jsonify(data_list_ord).get_json()
 
@@ -161,8 +179,19 @@ def alive_equipment():
             return make_response(
                 jsonify({"message": "Senha inválida"}), 401
             )
+<<<<<<< Updated upstream
 
 # FRONT-END ROUTES
+=======
+@app.route('/api/alive', methods=['GET'])
+def get_all_mac():
+    #print(data_list)
+    return make_response(
+        jsonify(alive_list)
+)    
+
+# FRONT E SOCKET
+>>>>>>> Stashed changes
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -176,4 +205,5 @@ def get_data():
     return jsonify(data_list_json)
 
 if __name__ == '__main__':
+<<<<<<< Updated upstream
     app.run(debug=True)

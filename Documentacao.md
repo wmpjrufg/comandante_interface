@@ -43,10 +43,8 @@ Método: POST
 
 É necessário informar no cabeçalho da requisição os seguintes parâmetros:
 
-    ```
     "Content-Type": "application/json",
     "Authorization": "Bearer senha-api"
-    ```
 
 Onde a 'senha-api' será fixa, seu valor é:
 
