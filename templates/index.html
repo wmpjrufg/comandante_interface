@@ -12,7 +12,7 @@
                 
                 for (let i = 0; i < data.length; i++) {
                     const peso = Math.round(data[i].pesos[data[i].pesos.length - 1]);
-                    const bateria = data[i].bateria[data[i].bateria.length - 1];
+                    const bateria = Math.round(data[i].bateria[data[i].bateria.length - 1]);
                     tables.innerHTML += `
                         <div id="table_${data[i].id}" class="table">
                             <p id="num_mesa">Mesa: ${data[i].id}</p>
