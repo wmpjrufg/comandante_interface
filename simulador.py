@@ -74,7 +74,7 @@ def thread_func(url, headers, dic, i):
             cont = cont + 1
 
 if __name__ == '__main__':
-    url = "http://comandante.pythonanywhere.com/api/measures"  # URL do servidor Flask local
+    url = "http://127.0.0.1:5000/api/measures"  # URL do servidor Flask local
     headers = {
         "Content-Type": "application/json",
         'Authorization': 'Bearer herhgydghdnsrtn3t'

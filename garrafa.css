@@ -39,10 +39,10 @@ body {
     fill: var(--background-color);
     stroke: none; /* Cor da linha */
     stroke-width: 5px; /* Largura da linha */
-    
+
 }
 .liq{
-    
+
     position: absolute; /* Posicionamento absoluto */
     bottom: 0; /* Coloca o elemento no final do body */
     height: 100%; /* Altura do elemento, calculada a partir do final do body */
