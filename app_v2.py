@@ -1,16 +1,13 @@
 from flask import Flask, request, jsonify, make_response, render_template
-from flask_socketio import SocketIO, send, emit
-
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
-socketio = SocketIO(app)
 
-#Constantes
-QUANT_WEIGHT = 20 #Quantidade máxima de dados armazenados de cada mesa
-MAX_TIME = 300 #segundos
-MAX_TIME_ALIVE = 120 #segundos
+# Constantes
+QUANT_WEIGHT = 20  # Quantidade máxima de dados armazenados de cada mesa
+MAX_TIME = 300  # segundos
+MAX_TIME_ALIVE = 120  # segundos
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 PASSWORD = 'herhgydghdnsrtn3t'
 
@@ -19,19 +16,25 @@ data_list_json = []
 alive_list = []
 data_list = []
 
+
+# @app.before_request
+# def before_request():
+#     if not request.is_secure and app.env != "development":
+#         url = request.url.replace("http://", "https://", 1)
+#         return redirect(url, code=301)
+
 def check_password(auth_header):
     if auth_header is None or not auth_header.startswith("Bearer "):
         return 1
     token = auth_header.split(" ")[1]
     if (token != PASSWORD):
         return 0
-    else: 
+    else:
         return 2
-    
-    
-#função para remover dados antigos
+
+# função para remover dados antigos
 def remove_oldest_data():
-    now =  datetime.today() 
+    now = datetime.today()
     for table in data_list:
         for index, horario in enumerate(table['horarios']):
             delay = (now - horario)
@@ -41,45 +44,48 @@ def remove_oldest_data():
                 del table['bateria'][index]
 
 def remove_not_alive():
-    now =  datetime.today() 
+    now = datetime.today()
+
+    to_remove = []
+
     for table in alive_list:
-        delay = (now - table['horario'])
-        if(delay > timedelta(seconds=MAX_TIME_ALIVE)):
-            del table
+        delay = now - table['horario']
+        if delay > timedelta(seconds=MAX_TIME_ALIVE):
+            to_remove.append(table)
+    for table in to_remove:
+        alive_list.remove(table)
 
-
-
-# remove os dados mais antigos quando atinge um limite  de dados armazenados:
+# remove os dados mais antigos quando atinge um limite de dados armazenados
 def remove_excess(id):
     table = [item for item in data_list if item["id"] == id]
     table = table[0]
-    #print((table['pesos']))
     while(len(table['pesos']) > QUANT_WEIGHT):
         table['horarios'].pop(0)
         table['pesos'].pop(0)
         table['bateria'].pop(0)
 
-
+def validate_integer(value):
+    try:
+        int(value)
+        return True
+    except (ValueError, TypeError):
+        return False
 
 @app.route("/api/measures", methods=['GET'])
 def get_all_measures():
-    #print(data_list)
     return make_response(
         jsonify(data_list)
     )
 
-
-# RECEBE OS PESOS E BATERIA DE CADA MESA 
+# RECEBE OS PESOS E BATERIA DE CADA MESA
 @app.route('/api/measures', methods=['POST'])
 def receive_weights():
-     auth_header = request.headers.get('Authorization')
-     validation = check_password(auth_header)
-     if(validation == 2):
+    auth_header = request.headers.get('Authorization')
+    validation = check_password(auth_header)
+    if(validation == 2):
         global data_list_json
         try:
             data = request.get_json()
-            # Verificar se o JSON contém os campos esperados
-
             if(data['id'] != ""):
                 chaves_necessarias = ["id", "bateria", "peso"]
                 for chave in chaves_necessarias:
@@ -87,18 +93,42 @@ def receive_weights():
                         print(f"A chave '{chave}' está faltando.")
                         raise ValueError("O JSON deve conter os campos 'id', 'bateria' e 'peso'")
             
-            #Converte as strings de tempo em Date
-            id = int(data['id'])
+            id = data['id']
+            bateria_data = data['bateria']
+            peso_data = data['peso']
             horarios = []
             pesos = []
             bateria = []
-        
-            # convert_date = verify_convert_date(data['horario'])#converte para date
-            horarios.append(datetime.today())
-            pesos.append(data['peso'])
-            bateria.append(data['bateria'])
+            
+            errors = {}
+            if not validate_integer(id):
+                errors['id'] = 'ID precisa ser um inteiro.'
+            if not validate_integer(bateria_data):
+                errors['bateria'] = 'Bateria precisa ser um inteiro.'
+            if not validate_integer(peso_data):
+                errors['peso'] = 'Peso precisa ser um inteiro.'
+
+            if errors:
+                return jsonify({'success': False, 'errors': errors}), 400
+
+            id = int(id)
+            bateria_data = int(bateria_data)
+            peso_data = int(peso_data)
+
+            if(id <= 0):
+                errors['id'] = 'ID precisa ser maior do que 0.'  
+            if (bateria_data < 0 or bateria_data > 100):
+                errors['bateria'] = 'Bateria precisa ser um inteiro entre 0 e 100.'
+            if (peso_data < 0 or peso_data > 100):
+                errors['peso'] = 'Peso precisa ser um inteiro entre 0 e 100.'  
+
+            if errors:
+                return jsonify({'success': False, 'errors': errors}), 400
                 
-            # Verifica se o Id já existe, se existe atualiza, caso contrário adiciona
+            horarios.append(datetime.today())
+            pesos.append(peso_data)
+            bateria.append(bateria_data)
+                
             if(any(item['id'] == id for item in data_list)):
                 for item in data_list:
                     if item['id'] == id:
@@ -107,32 +137,30 @@ def receive_weights():
                         item['bateria'].extend(bateria)
                         break
             else:
-                data_list.append({'id': id, 'horarios':horarios, 'pesos': pesos, 'bateria': bateria})
+                data_list.append({'id': id, 'horarios': horarios, 'pesos': pesos, 'bateria': bateria})
 
             remove_excess(id)
-
             remove_oldest_data()
 
-            
+
+            remove_not_alive()
+
             data_list_ord = sorted(data_list, key=lambda item: item['id'])
-            print(data_list_ord)
             data_list_json = jsonify(data_list_ord).get_json()
-            socketio.emit('message', data_list_json) #envia os dados assim q eles são atualizados
 
             return make_response(
-                jsonify( message= "Dados recebidos com sucesso", 
-                        data=data), 200
+                jsonify(message="Dados recebidos com sucesso", data=data), 200
             )
         except Exception as e:
             return make_response(
                 jsonify({"error": str(e)}), 400
             )
-     else:
+    else:
         if(validation == 1):
             return make_response(
                 jsonify({"message": "Token ausente ou inválido"}), 401
             )
-        else: 
+        else:
             return make_response(
                 jsonify({"message": "Senha inválida"}), 401
             )
@@ -145,22 +173,17 @@ def alive_equipment():
         global alive_list
         try:
             data = request.get_json()
-            # Verificar se o JSON contém os campos esperados
-
             if(data['id'] != ""):
                 chaves_necessarias = ["id", "mac"]
                 for chave in chaves_necessarias:
                     if chave not in data:
                         print(f"A chave '{chave}' está faltando.")
-                        raise ValueError("O JSON deve conter os campos 'id', e 'mac'")
+                        raise ValueError("O JSON deve conter os campos 'id' e 'mac'")
             
-            #Converte as strings de tempo em Date
             id = int(data['id'])
             horario = datetime.today()
             mac = data['mac']
-      
                 
-            # Verifica se o Id já existe, se existe atualiza, caso contrário adiciona
             if(any(item['id'] == id for item in alive_list)):
                 for item in alive_list:
                     if item['id'] == id:
@@ -171,10 +194,8 @@ def alive_equipment():
                 alive_list.append({'id': id, 'mac': mac, 'horario': horario})
 
             remove_not_alive()
-            print(alive_list)
             return make_response(
-                jsonify( message= "Dados recebidos com sucesso", 
-                        data=data), 200
+                jsonify(message="Dados recebidos com sucesso", data=data), 200
             )
         except Exception as e:
             return make_response(
@@ -185,23 +206,33 @@ def alive_equipment():
             return make_response(
                 jsonify({"message": "Token ausente ou inválido"}), 401
             )
-        else: 
+        else:
             return make_response(
                 jsonify({"message": "Senha inválida"}), 401
             )
 
+
+# FRONT-END ROUTES
+
+@app.route('/api/alive', methods=['GET'])
+def get_all_mac():
+    #print(data_list)
+    return make_response(
+        jsonify(alive_list)
+)    
 
 # FRONT E SOCKET
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@socketio.on('connect')
-def handle_connect():
-    global data_list_json
-    print('Client connected')
-    emit('message', data_list_json)  # Envia a mensagem ao cliente
+@app.route('/table')
+def table():
+    return render_template('index_table.html')
 
+@app.route('/api/get_data')
+def get_data():
+    return jsonify(data_list_json)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    app.run(debug=True)
