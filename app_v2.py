@@ -125,15 +125,42 @@ def receive_weights():
                         print(f"A chave '{chave}' está faltando.")
                         raise ValueError("O JSON deve conter os campos 'id', 'bateria' e 'peso'")
 
-            id = int(data['id'])
+            id = data['id']
+            bateria_data = data['bateria']
+            peso_data = data['peso']
             horarios = []
             pesos = []
             bateria = []
+            
+            errors = {}
+            if not validate_integer(id):
+                errors['id'] = 'ID precisa ser um inteiro.'
+            if not validate_integer(bateria_data):
+                errors['bateria'] = 'Bateria precisa ser um inteiro.'
+            if not validate_integer(peso_data):
+                errors['peso'] = 'Peso precisa ser um inteiro.'
 
+            if errors:
+                return jsonify({'success': False, 'errors': errors}), 400
+
+            id = int(id)
+            bateria_data = int(bateria_data)
+            peso_data = int(peso_data)
+
+            if(id <= 0):
+                errors['id'] = 'ID precisa ser maior do que 0.'  
+            if (bateria_data < 0 or bateria_data > 100):
+                errors['bateria'] = 'Bateria precisa ser um inteiro entre 0 e 100.'
+            if (peso_data < 0 or peso_data > 100):
+                errors['peso'] = 'Peso precisa ser um inteiro entre 0 e 100.'  
+
+            if errors:
+                return jsonify({'success': False, 'errors': errors}), 400
+                
             horarios.append(datetime.today())
-            pesos.append(data['peso'])
-            bateria.append(data['bateria'])
-
+            pesos.append(peso_data)
+            bateria.append(bateria_data)
+            
             if(any(item['id'] == id for item in data_list)):
                 for item in data_list:
                     if item['id'] == id:
