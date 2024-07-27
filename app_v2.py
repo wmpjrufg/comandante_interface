@@ -1,38 +1,62 @@
 from flask import Flask, request, jsonify, make_response, render_template, redirect, url_for
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
 import mysql.connector
 from mysql.connector import Error
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'supersecretkey'
 app.config['JSON_SORT_KEYS'] = False
 
-app = Flask(__name__)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'  # Redirecionar para a página de login se não autenticado
+
+
+class User(UserMixin):
+    def __init__(self, id, username):
+        self.id = id
+        self.username = username
+
+    def get_id(self):
+        return str(self.id)
 
 ## Função para verificar o login no MySQL
 def verifica_login(login, senha):
     try:
-        conn = mysql.connector.connect(
-            host="comandante.mysql.pythonanywhere-services.com",
-            user="comandante",
-            password="data2020",
-            database="comandante$default"
-        )
+        # conn = mysql.connector.connect(
+        #     host="comandante.mysql.pythonanywhere-services.com",
+        #     user="comandante",
+        #     password="data2020",
+        #     database="comandante$default"
+        # )
 
-        cursor = conn.cursor(dictionary=True)
+        # cursor = conn.cursor(dictionary=True)
 
-        query = "SELECT * FROM login WHERE login = %s AND senha = %s"
-        cursor.execute(query, (login, senha))
+        # query = "SELECT * FROM login WHERE login = %s AND senha = %s"
+        # cursor.execute(query, (login, senha))
 
-        user = cursor.fetchone()
+        # user = cursor.fetchone()
 
-        cursor.close()
-        conn.close()
+        # cursor.close()
+        # conn.close()
+        if(login == 'wanderlei' and senha == '123456'):
+            return User(id= 1, username=login)
+        else: 
+            return None
 
-        return user  # Retorna o usuário encontrado ou None se não encontrado
 
     except Error as e:
         print(f"Erro ao conectar ao MySQL: {e}")
         return None
+    
+@login_manager.user_loader
+def load_user(user_id):
+    # Simulação de carregamento de usuário pelo ID
+    if user_id == "1":
+        return User(id=1, username='wanderlei')
+    return None
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -48,12 +72,18 @@ def login():
         # print(f"Resultado da verificação: {user}")
 
         if user:
+            login_user(user)
             return redirect(url_for('index'))
         else:
             return render_template('login.html', error='Usuário ou senha incorretos')
 
     return render_template('login.html', error=None)
 
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 # Constantes
 QUANT_WEIGHT = 20  # Quantidade máxima de dados armazenados de cada mesa
@@ -102,6 +132,13 @@ def remove_excess(id):
         table['horarios'].pop(0)
         table['pesos'].pop(0)
         table['bateria'].pop(0)
+
+def validate_integer(value):
+    try:
+        int(value)
+        return True
+    except (ValueError, TypeError):
+        return False
 
 @app.route("/api/measures", methods=['GET'])
 def get_all_measures():
@@ -242,10 +279,12 @@ def alive_equipment():
 
 # FRONT-END ROUTES
 @app.route('/index')
+@login_required
 def index():
     return render_template('index.html')
 
 @app.route('/table')
+@login_required
 def table():
     return render_template('index_table.html')
 
