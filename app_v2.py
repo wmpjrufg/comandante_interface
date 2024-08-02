@@ -1,8 +1,63 @@
-from flask import Flask, request, jsonify, make_response, render_template
+from flask import Flask, request, jsonify, make_response, render_template, redirect, url_for, session
 from datetime import datetime, timedelta
+import mysql.connector
+from mysql.connector import Error
+from functools import wraps  # Importando wraps do módulo functools
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
+app.config['SECRET_KEY'] = 'sua_chave_secreta_aqui'  # Defina uma chave secreta para a sessão
+
+# Função para verificar o login no MySQL
+def verifica_login(login, senha):
+    try:
+        conn = mysql.connector.connect(
+            host="comandante.mysql.pythonanywhere-services.com",
+            user="comandante",
+            password="data2020",
+            database="comandante$default"
+        )
+
+        cursor = conn.cursor(dictionary=True)
+
+        query = "SELECT * FROM login WHERE login = %s AND senha = %s"
+        cursor.execute(query, (login, senha))
+
+        user = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return user  # Retorna o usuário encontrado ou None se não encontrado
+
+    except Error as e:
+        print(f"Erro ao conectar ao MySQL: {e}")
+        return None
+
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        login = request.form['login']
+        senha = request.form['senha']
+
+        user = verifica_login(login, senha)
+
+        if user:
+            session['logged_in'] = True
+            return redirect(url_for('index'))
+        else:
+            return render_template('login.html', error='Usuário ou senha incorretos')
+
+    return render_template('login.html', error=None)
+
+# Decorador para proteger rotas
+def login_required(f):
+    @wraps(f)  # Utilizando wraps para preservar o nome da função original
+    def wrap(*args, **kwargs):
+        if 'logged_in' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return wrap
 
 # Constantes
 QUANT_WEIGHT = 20  # Quantidade máxima de dados armazenados de cada mesa
@@ -16,18 +71,11 @@ data_list_json = []
 alive_list = []
 data_list = []
 
-
-# @app.before_request
-# def before_request():
-#     if not request.is_secure and app.env != "development":
-#         url = request.url.replace("http://", "https://", 1)
-#         return redirect(url, code=301)
-
 def check_password(auth_header):
     if auth_header is None or not auth_header.startswith("Bearer "):
         return 1
     token = auth_header.split(" ")[1]
-    if (token != PASSWORD):
+    if token != PASSWORD:
         return 0
     else:
         return 2
@@ -38,28 +86,23 @@ def remove_oldest_data():
     for table in data_list:
         for index, horario in enumerate(table['horarios']):
             delay = (now - horario)
-            if(delay > timedelta(seconds=MAX_TIME)):
+            if delay > timedelta(seconds=MAX_TIME):
                 del table['horarios'][index]
                 del table['pesos'][index]
                 del table['bateria'][index]
 
 def remove_not_alive():
     now = datetime.today()
-
-    to_remove = []
-
     for table in alive_list:
-        delay = now - table['horario']
+        delay = (now - table['horario'])
         if delay > timedelta(seconds=MAX_TIME_ALIVE):
-            to_remove.append(table)
-    for table in to_remove:
-        alive_list.remove(table)
+            del table
 
 # remove os dados mais antigos quando atinge um limite de dados armazenados
 def remove_excess(id):
     table = [item for item in data_list if item["id"] == id]
     table = table[0]
-    while(len(table['pesos']) > QUANT_WEIGHT):
+    while len(table['pesos']) > QUANT_WEIGHT:
         table['horarios'].pop(0)
         table['pesos'].pop(0)
         table['bateria'].pop(0)
@@ -75,30 +118,27 @@ def get_all_measures():
 def receive_weights():
     auth_header = request.headers.get('Authorization')
     validation = check_password(auth_header)
-    if(validation == 2):
+    if validation == 2:
         global data_list_json
         try:
             data = request.get_json()
-            if(data['id'] != ""):
+            if data['id'] != "":
                 chaves_necessarias = ["id", "bateria", "peso"]
                 for chave in chaves_necessarias:
                     if chave not in data:
                         print(f"A chave '{chave}' está faltando.")
                         raise ValueError("O JSON deve conter os campos 'id', 'bateria' e 'peso'")
-            
+
             id = int(data['id'])
             horarios = []
             pesos = []
             bateria = []
-        
+
             horarios.append(datetime.today())
             pesos.append(data['peso'])
             bateria.append(data['bateria'])
 
-            if (bateria[0] < 0 or bateria[0] > 100) or (pesos[0] < 0 or pesos[0] > 100):
-                raise ValueError("Os campos peso e bateria devem conter valores entre 0 e 100")
-                
-            if(any(item['id'] == id for item in data_list)):
+            if any(item['id'] == id for item in data_list):
                 for item in data_list:
                     if item['id'] == id:
                         item['horarios'].extend(horarios)
@@ -111,9 +151,6 @@ def receive_weights():
             remove_excess(id)
             remove_oldest_data()
 
-
-            remove_not_alive()
-
             data_list_ord = sorted(data_list, key=lambda item: item['id'])
             data_list_json = jsonify(data_list_ord).get_json()
 
@@ -125,7 +162,7 @@ def receive_weights():
                 jsonify({"error": str(e)}), 400
             )
     else:
-        if(validation == 1):
+        if validation == 1:
             return make_response(
                 jsonify({"message": "Token ausente ou inválido"}), 401
             )
@@ -138,22 +175,22 @@ def receive_weights():
 def alive_equipment():
     auth_header = request.headers.get('Authorization')
     validation = check_password(auth_header)
-    if(validation == 2):
+    if validation == 2:
         global alive_list
         try:
             data = request.get_json()
-            if(data['id'] != ""):
+            if data['id'] != "":
                 chaves_necessarias = ["id", "mac"]
                 for chave in chaves_necessarias:
                     if chave not in data:
                         print(f"A chave '{chave}' está faltando.")
                         raise ValueError("O JSON deve conter os campos 'id' e 'mac'")
-            
+
             id = int(data['id'])
             horario = datetime.today()
             mac = data['mac']
-                
-            if(any(item['id'] == id for item in alive_list)):
+
+            if any(item['id'] == id for item in alive_list):
                 for item in alive_list:
                     if item['id'] == id:
                         item['horario'] = horario
@@ -171,7 +208,7 @@ def alive_equipment():
                 jsonify({"error": str(e)}), 400
             )
     else:
-        if(validation == 1):
+        if validation == 1:
             return make_response(
                 jsonify({"message": "Token ausente ou inválido"}), 401
             )
@@ -180,28 +217,21 @@ def alive_equipment():
                 jsonify({"message": "Senha inválida"}), 401
             )
 
-
 # FRONT-END ROUTES
-
-@app.route('/api/alive', methods=['GET'])
-def get_all_mac():
-    #print(data_list)
-    return make_response(
-        jsonify(alive_list)
-)    
-
-# FRONT E SOCKET
-@app.route('/')
+@app.route('/index')
+@login_required
 def index():
     return render_template('index.html')
 
 @app.route('/table')
+@login_required
 def table():
     return render_template('index_table.html')
 
 @app.route('/api/get_data')
+@login_required
 def get_data():
     return jsonify(data_list_json)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
