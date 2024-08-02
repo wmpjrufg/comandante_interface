@@ -128,6 +128,9 @@ def receive_weights():
                     if chave not in data:
                         print(f"A chave '{chave}' está faltando.")
                         raise ValueError("O JSON deve conter os campos 'id', 'bateria' e 'peso'")
+                
+                if not (0 <= data['peso'] <= 100) or not (0 <= data['bateria'] <= 100):
+                    raise ValueError("Os valores de 'peso' e 'bateria' devem estar entre 0 e 100")
 
             id = int(data['id'])
             horarios = []
@@ -185,6 +188,9 @@ def alive_equipment():
                     if chave not in data:
                         print(f"A chave '{chave}' está faltando.")
                         raise ValueError("O JSON deve conter os campos 'id' e 'mac'")
+                
+                if not (0 <= data['bateria'] <= 100):
+                    raise ValueError("O valor de 'bateria' deve estar entre 0 e 100")
 
             id = int(data['id'])
             horario = datetime.today()
@@ -216,6 +222,7 @@ def alive_equipment():
             return make_response(
                 jsonify({"message": "Senha inválida"}), 401
             )
+
 
 # FRONT-END ROUTES
 @app.route('/index')
