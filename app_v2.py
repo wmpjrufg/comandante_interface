@@ -28,8 +28,8 @@ app.config['SECRET_KEY'] = 'supersecretkey'
 app.config['JSON_SORT_KEYS'] = False
 
 if not app.debug:  # Evite que as mensagens de debug sejam registradas em produção
-    #handler = RotatingFileHandler('/home/nilsonleao/nilsonleao.pythonanywhere.com.error.log', maxBytes=10000, backupCount=1)
-    handler = RotatingFileHandler('./teste.log', maxBytes=10000, backupCount=1)
+    handler = RotatingFileHandler('/home/nilsonleao/nilsonleao.pythonanywhere.com.error.log', maxBytes=10000, backupCount=1)
+    #handler = RotatingFileHandler('./teste.log', maxBytes=10000, backupCount=1)
     handler.setLevel(logging.ERROR)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
@@ -68,11 +68,10 @@ def verifica_login(login, senha):
         cursor.execute(query, (login, senha))
 
         user = cursor.fetchone()
-        print(user)
         cursor.close()
         conn.close()
-        if(login == user[1] and senha == user[2]):
-            return User(id= user[0], username=user[1])
+        if user:
+            return User(id= user['id'], username=user['login'])
         else: 
             return None
 
@@ -176,7 +175,7 @@ def validate_integer(value):
 def get_all_measures():
     remove_oldest_data()
     return make_response(
-        jsonify(data_list)
+        jsonify(sorted(data_list, key=lambda item: item['id']))
     )
 
 # RECEBE OS PESOS E BATERIA DE CADA MESA
