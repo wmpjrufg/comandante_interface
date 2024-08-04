@@ -2,80 +2,75 @@
 <html>
 <head>
     <title>Comandante</title>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-    <link rel="stylesheet" href="garrafa.css">
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {
 
             function tables(data){
-                const tables = document.querySelector('#tables')
+                const tables = document.querySelector('#tables');
                 tables.innerHTML = '';
-                
+
                 for (let i = 0; i < data.length; i++) {
-                    var peso = 0
-                    // console.log(i)
-                    peso = Math.round((data[i].pesos[data[i].pesos.length -1]));
-                    bateria = data[i].bateria[data[i].bateria.length -1]
-                    tables.innerHTML += `<div id="table_${data[i].id}" class= table>
-                        <p id="num_mesa">Mesa: ${data[i].id}</p>
-                        <div class="bottle">
-                            <div class="boca"></div>
-                            <svg width="40px" height="100px" viewBox="0 0 40 100" xmlns="http://www.w3.org/2000/svg">
-                                <!-- Trapézio -->
-                                <polygon class="neck" points="7,0 33,0 40,100 0,100" fill="#fff" stroke="none" />
-                                <!-- Linha superior -->
-                                <line x1="9" y1="0" x2="31" y2="0" stroke="black" stroke-width="3" />
-                                <!-- Linha esquerda -->
-                                <line x1="9" y1="0" x2="0" y2="100" stroke="black" stroke-width="3" />
-                                <!-- Linha direita -->
-                                <line x1="31" y1="0" x2="40" y2="100" stroke="black" stroke-width="3" />
-                            
-                                <!-- Círculo achato com borda -->
-                            </svg>
-                            <div class="body">
-                                <div class="liq"></div>
+                    const peso = Math.round(data[i].pesos[data[i].pesos.length - 1]);
+                    const bateria = data[i].bateria[data[i].bateria.length - 1];
+                    tables.innerHTML += `
+                        <div id="table_${data[i].id}" class="table">
+                            <p id="num_mesa">Mesa: ${data[i].id}</p>
+                            <div class="bottle">
+                                <div class="boca"></div>
+                                <svg width="40px" height="100px" viewBox="0 0 40 100" xmlns="http://www.w3.org/2000/svg">
+                                    <polygon class="neck" points="7,0 33,0 40,100 0,100" fill="#fff" stroke="none" />
+                                    <line x1="9" y1="0" x2="31" y2="0" stroke="black" stroke-width="3" />
+                                    <line x1="9" y1="0" x2="0" y2="100" stroke="black" stroke-width="3" />
+                                    <line x1="31" y1="0" x2="40" y2="100" stroke="black" stroke-width="3" />
+                                </svg>
+                                <div class="body">
+                                    <div class="liq"></div>
+                                </div>
                             </div>
-                        </div>
-                         <p class="porcentagem" id="porcentagem_${data[i].id}">${peso}%</p>
-                         <div class="bateria" ><div class="carga" id="bateria_${data[i].id}"></div></div>
-                         <p id = "mensagem_${data[i].id}" class = "msg"> </p>
-                    </div>`;
+                            <p class="porcentagem" id="porcentagem_${data[i].id}">${peso}%</p>
+                            <div class="bateria">
+                                <div class="carga" id="bateria_${data[i].id}"></div>
+                            </div>
+                            <p id="mensagem_${data[i].id}" class="msg"></p>
+                        </div>`;
+
                     const qtde = document.querySelector(`#table_${data[i].id} .liq`);
                     const porc = document.querySelector(`#porcentagem_${data[i].id}`);
                     const mesa = document.querySelector(`#table_${data[i].id}`);
                     const msg = document.querySelector(`#mensagem_${data[i].id}`);
                     const bat = document.querySelector(`#bateria_${data[i].id}`);
-                    qtde.style.height = `${peso}%`
-                    bat.style.height = `${bateria}%`
-                    if(bateria < 20){
-                        bat.style.backgroundColor = `red`
-                    }
-                    if(peso < 20){
-                        qtde.style.backgroundColor = `red`
-                        msg.innerText = "TROCAR"
-                        mesa.style.borderColor = "red"
-                        porc.style.color = 'red'
-                    }
 
+                    qtde.style.height = `${peso}%`;
+                    bat.style.height = `${bateria}%`;
+
+                    if (bateria < 20) {
+                        bat.style.backgroundColor = 'red';
+                    }
+                    if (peso < 20) {
+                        qtde.style.backgroundColor = 'red';
+                        msg.innerText = "TROCAR";
+                        mesa.style.borderColor = "red";
+                        porc.style.color = 'red';
+                    }
                 }
             }
 
-            var socket = io.connect('http://' + document.domain + ':' + location.port);
+            function fetchData() {
+                fetch('/api/measures')
+                    .then(response => response.json())
+                    .then(data => {
+                        tables(data);
+                    })
+                    .catch(error => {
+                        console.error('Erro ao buscar dados:', error);
+                    });
+            }
 
-            socket.on('connect', function() {
-                console.log('Connected to WebSocket');
-                socket.send('Hello from client!');
-            });
-
-            socket.on('message', function(msg) {
-                console.log('Message from server:', msg);
-                data = msg
-                tables(data);
-            });
-
+            setInterval(fetchData, 5000);
+            fetchData();
         });
     </script>
-    <style>
+     <style>
         h1{
             text-align: center;
         }
@@ -113,7 +108,7 @@
             margin-right: 5%;
             border: 2px solid gray;
             border-radius: 10px;
-            
+
         }
         .bottle {
 
@@ -147,10 +142,10 @@
             fill: var(--background-color);
             stroke: none; /* Cor da linha */
             stroke-width: 5px; /* Largura da linha */
-            
+
         }
         .liq{
-            
+
             position: absolute; /* Posicionamento absoluto */
             bottom: 0; /* Coloca o elemento no final do body */
             height: 100%; /* Altura do elemento, calculada a partir do final do body */
@@ -164,7 +159,7 @@
             bottom:36px;
             left: 53px;
             text-align: center;
-            padding: 2px 5px;         
+            padding: 2px 5px;
             font-size: 20px;
         }
 
@@ -172,9 +167,9 @@
             position: absolute;
             left: 37px;
             text-align: center;
-            color: black;              
-            font-size: 25px; 
-            margin-bottom: 0; 
+            color: black;
+            font-size: 25px;
+            margin-bottom: 0;
         }
         .msg{
             position: absolute;
@@ -205,8 +200,6 @@
 </head>
 <body>
     <h1>Mesas</h1>
-    <div id="tables">
-        
-    </div>
+    <div id="tables"></div>
 </body>
 </html>
