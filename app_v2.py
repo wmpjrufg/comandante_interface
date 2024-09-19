@@ -40,9 +40,10 @@ def login():
         login = request.form['login']
         senha = request.form['senha']
 
-        user = verifica_login(login, senha)
+        # user = verifica_login(login, senha)
 
-        if user:
+        # if user:
+        if login == 'wanderlei' and senha == '123':
             session['logged_in'] = True
             return redirect(url_for('index'))
         else:
@@ -240,5 +241,5 @@ def table():
 def get_data():
     return jsonify(data_list_json)
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
