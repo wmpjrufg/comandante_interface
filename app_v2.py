@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify, make_response, render_template, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
-import mysql.connector
-from mysql.connector import Error
+# import mysql.connector
+# from mysql.connector import Error
 import logging
 import os
 from logging.handlers import RotatingFileHandler
@@ -27,13 +27,13 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
 app.config['JSON_SORT_KEYS'] = False
 
-if not app.debug:  # Evite que as mensagens de debug sejam registradas em produção
-    handler = RotatingFileHandler('/home/nilsonleao/nilsonleao.pythonanywhere.com.error.log', maxBytes=10000, backupCount=1)
-    #handler = RotatingFileHandler('./teste.log', maxBytes=10000, backupCount=1)
-    handler.setLevel(logging.ERROR)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    app.logger.addHandler(handler)
+# if not app.debug:  # Evite que as mensagens de debug sejam registradas em produção
+#     handler = RotatingFileHandler('/home/nilsonleao/nilsonleao.pythonanywhere.com.error.log', maxBytes=10000, backupCount=1)
+#     #handler = RotatingFileHandler('./teste.log', maxBytes=10000, backupCount=1)
+#     handler.setLevel(logging.ERROR)
+#     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+#     handler.setFormatter(formatter)
+#     app.logger.addHandler(handler)
 
 
 login_manager = LoginManager()
@@ -51,35 +51,39 @@ class User(UserMixin):
 
 ## Função para verificar o login no MySQL
 def verifica_login(login, senha):
-    try:
-        conn = mysql.connector.connect(
-            # host="comandante.mysql.pythonanywhere-services.com",
-            host="nilsonleao.mysql.pythonanywhere-services.com",
-            #user="comandante",
-            user="nilsonleao",
-            password="data2020",
-            # database="comandante$default"
-            database="nilsonleao$comandante"
-        )
-
-        cursor = conn.cursor(dictionary=True)
-
-        query = "SELECT * FROM login WHERE login = %s AND senha = %s"
-        cursor.execute(query, (login, senha))
-
-        user = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        if user:
-            return User(id= user['id'], username=user['login'])
-        else: 
-            return None
-
-
-    except Error as e:
-        logging.error(f"Erro ao conectar ao MySQL: {e}")
-        print(f"Erro ao conectar ao MySQL: {e}")
+    if(login == 'Nilson') and (senha == '123'):
+        return User(id= 1, username=login)
+    else: 
         return None
+    # try:
+    #     conn = mysql.connector.connect(
+    #         # host="comandante.mysql.pythonanywhere-services.com",
+    #         host="nilsonleao.mysql.pythonanywhere-services.com",
+    #         #user="comandante",
+    #         user="nilsonleao",
+    #         password="data2020",
+    #         # database="comandante$default"
+    #         database="nilsonleao$comandante"
+    #     )
+
+    #     cursor = conn.cursor(dictionary=True)
+
+    #     query = "SELECT * FROM login WHERE login = %s AND senha = %s"
+    #     cursor.execute(query, (login, senha))
+
+    #     user = cursor.fetchone()
+    #     cursor.close()
+    #     conn.close()
+    #     if user:
+    #         return User(id= user['id'], username=user['login'])
+    #     else: 
+    #         return None
+
+
+    # except Error as e:
+    #     logging.error(f"Erro ao conectar ao MySQL: {e}")
+    #     print(f"Erro ao conectar ao MySQL: {e}")
+    #     return None
     
 @login_manager.user_loader
 def load_user(user_id):

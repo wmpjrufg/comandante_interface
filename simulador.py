@@ -74,8 +74,8 @@ def thread_func(url, headers, dic, i):
             cont = cont + 1
 
 if __name__ == '__main__':
-    url = "https://nilsonleao.pythonanywhere.com/api/measures"  # URL do servidor Flask local
-    # url = "http://127.0.0.1:5000/api/measures"
+    # url = "https://nilsonleao.pythonanywhere.com/api/measures"  # URL do servidor Flask local
+    url = "http://127.0.0.1:5000/api/measures"
     headers = {
         "Content-Type": "application/json",
         'Authorization': 'Bearer herhgydghdnsrtn3t'
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     threads = []
 
-    for i in range(1,3):
+    for i in range(1,11):
         thread = threading.Thread(target=thread_func, args=(url, headers, dic, i))
         threads.append(thread)
         thread.start()
