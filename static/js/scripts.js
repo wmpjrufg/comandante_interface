@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     for (let i = 0; i < data.length; i++) {
       const peso = Math.round(data[i].pesos[data[i].pesos.length - 1]);
-      console.log(peso);
       const bateria = data[i].bateria[data[i].bateria.length - 1];
       tables.innerHTML += `
             <div class="col-lg-6 col-xxl-4 mb-5" id="table_${data[i].id}">
@@ -28,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <div class="bateria">
                                 <div class="carga" id="bateria_${data[i].id}"></div>
                             </div>
-                            <p id="mensagem_${data[i].id}" class="msg"></p>
+                            
                         </div>
                 </div>
             </div>`;
@@ -66,6 +65,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  setInterval(fetchData, 60000);
+  setInterval(fetchData, 1000);
   fetchData();
 });

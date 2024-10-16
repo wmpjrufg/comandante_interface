@@ -179,7 +179,7 @@ def validate_integer(value):
 def get_all_measures():
     remove_oldest_data()
     return make_response(
-        jsonify(sorted(data_list, key=lambda item: item['id']))
+        jsonify(sorted(data_list, key=lambda item: item['pesos'][-1]))
     )
 
 # RECEBE OS PESOS E BATERIA DE CADA MESA
@@ -249,7 +249,7 @@ def receive_weights():
             remove_excess(id)
             remove_oldest_data()
 
-            data_list_ord = sorted(data_list, key=lambda item: item['id'])
+            data_list_ord = sorted(data_list, key=lambda item: item['pesos'][-1])
             data_list_json = jsonify(data_list_ord).get_json()
 
             return make_response(

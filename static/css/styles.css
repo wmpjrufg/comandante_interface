@@ -103,6 +103,9 @@ body {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
+section{
+  min-height: 85vh;
+}
 
 hr {
   margin: 1rem 0;
@@ -11616,11 +11619,7 @@ textarea.form-control-lg {
 
 }
 .porcentagem {
-  position: absolute;
-  top:16px;
-  left: 20px;
   text-align: center;
-  padding: 2px 5px;
   font-size: 20px;
 }
 
