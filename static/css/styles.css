@@ -11556,9 +11556,9 @@ textarea.form-control-lg {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 4rem;
-  width: 4rem;
-  font-size: 2rem;
+  height: 20%;
+  aspect-ratio: 1 / 1; 
+  font-size: clamp(1rem, 5vw, 2em) 
 }
 
 /* GARRAFAS */
@@ -11610,25 +11610,29 @@ textarea.form-control-lg {
 }
 .liq{
 
-  position: absolute; /* Posicionamento absoluto */
+  position: relative; /* Posicionamento absoluto */
   bottom: 0; /* Coloca o elemento no final do body */
   height: 100%; /* Altura do elemento, calculada a partir do final do body */
   width: 100%; /* Largura total do body */
   background-color: rgb(248, 229, 68); /* Cor de fundo */
-
-
+  border-radius: 10px
 }
 .porcentagem {
-  text-align: center;
-  font-size: 20px;
+  position: absolute; /* Posiciona o p sobre a imagem */
+  top: 90%; /* Centraliza verticalmente */
+  left: 50%; /* Centraliza horizontalmente */
+  transform: translate(-50%, -50%); /* Ajusta para garantir o verdadeiro centro */
+  color: white; /* Cor do texto */
+  font-size: clamp(1rem, 5vw, 2em) ; /* Ajuste de tamanho de fonte */
+
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); /* Sombra no texto para melhorar visibilidade */
 }
 
-#num_mesa {
+#numero {
   position: absolute;
-  left: 37px;
+  left:1%;
   text-align: center;
-  color: black;
-  font-size: 25px;
+  font-size: clamp(1rem, 5vw, 2em) ;
   margin-bottom: 0;
 }
 .msg{
@@ -11641,8 +11645,8 @@ textarea.form-control-lg {
 }
 .bateria {
   position: absolute;
-  height: 50px;
-  width: 10px;
+  height: 28%;
+  width: 6%;
   right: 5px;
   top: 4px;
   border: 1px solid black;
@@ -11655,4 +11659,7 @@ textarea.form-control-lg {
   width: 100%;
   background-color: rgb(25, 212, 25);
   border-radius: 3px;
+}
+img{
+  border-radius: 10px
 }

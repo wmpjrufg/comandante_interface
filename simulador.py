@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     threads = []
 
-    for i in range(1,11):
+    for i in range(1,13):
         thread = threading.Thread(target=thread_func, args=(url, headers, dic, i))
         threads.append(thread)
         thread.start()
