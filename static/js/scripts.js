@@ -7,10 +7,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const peso = Math.round(data[i].pesos[data[i].pesos.length - 1]);
       const bateria = data[i].bateria[data[i].bateria.length - 1];
       tables.innerHTML += `
-            <div class="col-4 col-lg-2 col-xxl-2 mb-1" style="border-radius: 10px" id="table_${data[i].id}">
+            <div class="col-4 col-lg-2 col-xxl-2 mb-1" style="border-radius: 10px; max-width: fit-content;" id="table_${data[i].id}">
               <div class="liq">
                 <div id="numero" class="feature bg-primary bg-gradient text-white rounded-3" style="position=absolute;">${data[i].id}</div>
-                <img src="static/garrafa_png.png" class="img-fluid"/>
+                <img src="static/garrafa_png2.png" class="img-fluid"/>
                 <p class="porcentagem" id="porcentagem_${data[i].id}">${peso}%</p>
                 <div class="bateria">
                                 <div class="carga" id="bateria_${data[i].id}"></div>
@@ -56,6 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  setInterval(fetchData, 1000);
+  setInterval(fetchData, 100000);
   fetchData();
 });

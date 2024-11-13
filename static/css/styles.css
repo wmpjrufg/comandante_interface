@@ -11623,8 +11623,7 @@ textarea.form-control-lg {
   left: 50%; /* Centraliza horizontalmente */
   transform: translate(-50%, -50%); /* Ajusta para garantir o verdadeiro centro */
   color: white; /* Cor do texto */
-  font-size: clamp(1rem, 5vw, 2em) ; /* Ajuste de tamanho de fonte */
-
+  font-size: clamp(1rem, 5vw, 2em); /* Ajuste de tamanho de fonte */
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); /* Sombra no texto para melhorar visibilidade */
 }
 
