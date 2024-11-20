@@ -56,6 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  setInterval(fetchData, 100000);
+  setInterval(fetchData, 1000);
   fetchData();
 });

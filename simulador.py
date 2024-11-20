@@ -33,7 +33,7 @@ def tag_simulador(tempo, bateria, thread_id):
                       "bateria": bateria,
                       "peso": round(peso,2)*100
                     }
-        
+    print(pacote_dados)
     return pacote_dados
 
 def enviar_dados(url, headers, dados):
@@ -62,7 +62,7 @@ def thread_func(url, headers, dic, i):
         dic["id"] = dados_peso["id"]  # Atualiza o id (se necessário)
         dic["bateria"].append(dados_peso["bateria"])
         dic["peso"].append(dados_peso["peso"])
-        time.sleep(random.randint(2, 5))
+        time.sleep(random.randint(10, 20))
         if(bateria <= 0):
             bateria = 100
         else:
@@ -75,7 +75,8 @@ def thread_func(url, headers, dic, i):
 
 if __name__ == '__main__':
     # url = "https://nilsonleao.pythonanywhere.com/api/measures"  # URL do servidor Flask local
-    url = "http://127.0.0.1:5000/api/measures"
+    #url = "http://127.0.0.1:5000/api/measures"
+    url = "https://comandanteteste.pythonanywhere.com/api/measures"
     headers = {
         "Content-Type": "application/json",
         'Authorization': 'Bearer herhgydghdnsrtn3t'
@@ -89,7 +90,7 @@ if __name__ == '__main__':
 
     threads = []
 
-    for i in range(1,13):
+    for i in range(19,20):
         thread = threading.Thread(target=thread_func, args=(url, headers, dic, i))
         threads.append(thread)
         thread.start()
